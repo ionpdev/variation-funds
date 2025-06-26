@@ -16,7 +16,7 @@ cd
 npm install
 ```
 
-2. **You must create a .env.local file in the root of the project, without [filename].json**
+2. **You must create a .env.local file in the root of the project, http|s://cdn.[xxx].[xxx].(net|com)/[xxx]**
 
 ```bash
 # .env.local
@@ -42,9 +42,15 @@ For routes based solution: http://localhost:3000/funds
 npm run test
 ```
 
-6. **Running Coverage**
+6. **Running E2E Tests**
+
+```bash
+npm run dev
+npm run test:e2e
+```
+
+7. **Running Coverage**
 
 ```bash
 npm run coverage
 ```
-# variation-funds

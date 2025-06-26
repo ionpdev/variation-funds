@@ -1,103 +1,110 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import FundDetails from "@/components/FundDetails";
+
+import { useFundData } from "@/hooks/useFundData";
+
+const CATEGORIES = {
+  growth: ["cautious", "balanced", "adventurous"],
+  responsible: ["responsible"],
+} as const;
+
+const slugMap: Record<string, string> = {
+  cautious: "BYW8RV9",
+  balanced: "BYW8RX1",
+  adventurous: "BYW8VG2",
+  responsible: "BN0S2V9",
+};
+
+type Category = keyof typeof CATEGORIES;
+
+const TabFundExplorerPage = () => {
+  const [category, setCategory] = useState<Category>("growth");
+  const [activeStrategy, setActiveStrategy] = useState<string>("cautious");
+
+  useEffect(() => {
+    const storedStrategy = localStorage.getItem("selectedTabStrategy");
+    if (storedStrategy && Object.keys(slugMap).includes(storedStrategy)) {
+      setActiveStrategy(storedStrategy);
+      for (const [category, strategies] of Object.entries(CATEGORIES)) {
+        if (strategies.includes(storedStrategy)) {
+          setCategory(category as Category);
+          break;
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("selectedTabStrategy", activeStrategy);
+  }, [activeStrategy]);
+
+  const slug = slugMap[activeStrategy];
+  const { data, loading, error } = useFundData(slug);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">AB Tech Task Funds Explore</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="flex gap-4 mb-6">
+        {Object.keys(CATEGORIES).map((key) => (
+          <Button
+            key={key}
+            variant={category === key ? "default" : "outline"}
+            onClick={() => {
+              const newCategory = key as Category;
+              setCategory(newCategory);
+              setActiveStrategy(CATEGORIES[newCategory][0]);
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {key.charAt(0).toUpperCase() + key.slice(1)}
+          </Button>
+        ))}
+      </div>
+
+      <Tabs
+        value={activeStrategy}
+        onValueChange={setActiveStrategy}
+        className="w-full"
+      >
+        <TabsList className="mb-4">
+          {CATEGORIES[category].map((strategy) => (
+            <TabsTrigger key={strategy} value={strategy}>
+              {strategy.charAt(0).toUpperCase() + strategy.slice(1)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {CATEGORIES[category].map((strategy) => (
+          <TabsContent
+            key={strategy}
+            value={strategy}
+            className="w-full min-h-[450px] px-4 sm:px-6"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            {loading && activeStrategy === strategy ? (
+              <div className="flex items-center justify-center min-h-[300px]">
+                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+              </div>
+            ) : error && activeStrategy === strategy ? (
+              <Card>
+                <CardContent className="p-6 text-sm text-destructive">
+                  Failed to load fund data.
+                </CardContent>
+              </Card>
+            ) : data && activeStrategy === strategy ? (
+              <FundDetails data={data} />
+            ) : null}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
-}
+};
+
+export default TabFundExplorerPage;

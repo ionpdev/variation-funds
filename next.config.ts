@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    NEXT_PUBLIC_CDN_BASE_URL: process.env.CDN_BASE_URL,
+  },
 };
 
 export default nextConfig;
